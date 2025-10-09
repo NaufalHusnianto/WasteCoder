@@ -15,11 +15,17 @@ EditorBuildSettings:
     path: Assets/Scenes/tes.unity
     guid: 127f69cd067318e4483ffa34198ca5cd
   - enabled: 1
+    path: Assets/Scenes/PartLearn.unity
+    guid: 0b2549f8067827a44850a605839ee6e1
+  - enabled: 1
     path: Assets/Scenes/Learning.unity
     guid: 16aa4e82606c0e648b02268cce441dde
   - enabled: 1
-    path: Assets/Scenes/PartLearn.unity
-    guid: 0b2549f8067827a44850a605839ee6e1
+    path: Assets/Scenes/Part/Part1.unity
+    guid: ceee1c4b77479a5409e902c95f2a7069
+  - enabled: 1
+    path: Assets/Scenes/Part/Part1 Opening.unity
+    guid: bed35afed8d199f42b0aa254ee6cd8be
   m_configObjects:
     com.unity.input.settings.actions: {fileID: -944628639613478452, guid: 052faaac586de48259a63d0c4782560b, type: 3}
   m_UseUCBPForAssetBundles: 0
