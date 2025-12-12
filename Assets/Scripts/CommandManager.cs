@@ -23,17 +23,19 @@ public class CommandManager : MonoBehaviour
     
     void Update()
     {
-        // Refresh dengan tombol R
-        if (Input.GetKeyDown(KeyCode.R))
-        {
-            InitializeCommandArray();
-        }
+        InitializeCommandArray();
+
+        // // Refresh dengan tombol R
+        // if (Input.GetKeyDown(KeyCode.R))
+        // {
+        //     InitializeCommandArray();
+        // }
         
-        // Print dengan tombol P
-        if (Input.GetKeyDown(KeyCode.P))
-        {
-            PrintCommandArray();
-        }
+        // // Print dengan tombol P
+        // if (Input.GetKeyDown(KeyCode.P))
+        // {
+        //     PrintCommandArray();
+        // }
     }
     
     public void InitializeCommandArray()
