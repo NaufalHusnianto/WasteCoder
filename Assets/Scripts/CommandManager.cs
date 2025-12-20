@@ -24,18 +24,6 @@ public class CommandManager : MonoBehaviour
     void Update()
     {
         InitializeCommandArray();
-
-        // // Refresh dengan tombol R
-        // if (Input.GetKeyDown(KeyCode.R))
-        // {
-        //     InitializeCommandArray();
-        // }
-        
-        // // Print dengan tombol P
-        // if (Input.GetKeyDown(KeyCode.P))
-        // {
-        //     PrintCommandArray();
-        // }
     }
     
     public void InitializeCommandArray()
@@ -94,7 +82,7 @@ public class CommandManager : MonoBehaviour
             
             string commandName = child.name.ToLower();
             
-            // Deteksi command
+            // Deteksi command (tambahkan DepositTrash)
             if (commandName.Contains("move"))
             {
                 if (debugMode) Debug.Log($"   ✅ Slot {slotIndex}: Ditemukan 'Move'");
@@ -109,6 +97,16 @@ public class CommandManager : MonoBehaviour
             {
                 if (debugMode) Debug.Log($"   ✅ Slot {slotIndex}: Ditemukan 'TurnRight'");
                 return "TurnRight";
+            }
+            else if (commandName.Contains("collect") || commandName.Contains("trash"))
+            {
+                if (debugMode) Debug.Log($"   ✅ Slot {slotIndex}: Ditemukan 'CollectTrash'");
+                return "CollectTrash";
+            }
+            else if (commandName.Contains("deposit") || commandName.Contains("bin"))
+            {
+                if (debugMode) Debug.Log($"   ✅ Slot {slotIndex}: Ditemukan 'DepositTrash'");
+                return "DepositTrash";
             }
         }
         
@@ -192,7 +190,39 @@ public class CommandManager : MonoBehaviour
         return false;
     }
     
-    // Method untuk eksekusi command (bisa ditambahkan later)
+    // Method untuk mendapatkan statistik command
+    public Dictionary<string, int> GetCommandStatistics()
+    {
+        Dictionary<string, int> stats = new Dictionary<string, int>
+        {
+            { "Move", 0 },
+            { "TurnLeft", 0 },
+            { "TurnRight", 0 },
+            { "CollectTrash", 0 },
+            { "DepositTrash", 0 },
+            { "Empty", 0 },
+            { "TotalUsed", 0 }
+        };
+        
+        string[] commands = GetCommandArray();
+        
+        foreach (string cmd in commands)
+        {
+            if (stats.ContainsKey(cmd))
+            {
+                stats[cmd]++;
+            }
+            
+            if (cmd != "Empty")
+            {
+                stats["TotalUsed"]++;
+            }
+        }
+        
+        return stats;
+    }
+    
+    // Method untuk eksekusi command
     public void ExecuteAllCommands()
     {
         InitializeCommandArray();
@@ -203,7 +233,6 @@ public class CommandManager : MonoBehaviour
             if (commandArray[i] != "Empty")
             {
                 Debug.Log($"   ▶️ Slot {i + 1}: {commandArray[i]}");
-                // Tambahkan logika eksekusi di sini
             }
         }
     }

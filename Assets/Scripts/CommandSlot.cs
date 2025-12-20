@@ -18,7 +18,7 @@ public class CommandSlot : MonoBehaviour, IDropHandler, IPointerEnterHandler, IP
 
     public void OnDrop(PointerEventData eventData)
     {
-        // Debug.Log("Drop detected in slot: " + gameObject.name);
+        Debug.Log("Drop detected in slot: " + gameObject.name);
 
         if (transform.childCount != 0)
         {
@@ -27,14 +27,29 @@ public class CommandSlot : MonoBehaviour, IDropHandler, IPointerEnterHandler, IP
         }
         
         // Cari original draggable command dari object yang di-drag
-            GameObject draggedObject = eventData.pointerDrag;
+        GameObject draggedObject = eventData.pointerDrag;
         if (draggedObject != null)
         {
+            // Coba cari DraggableCommand (untuk Move, TurnLeft, TurnRight)
             DraggableCommand draggable = draggedObject.GetComponentInParent<DraggableCommand>();
             if (draggable != null)
             {
-                Debug.Log("command berhasil masuk");
+                Debug.Log("Command berhasil masuk (DraggableCommand)");
                 draggable.CreatePermanentClone(transform);
+            }
+            else
+            {
+                // Coba cari CollectCommand (untuk CollectTrash)
+                CollectCommand collectCommand = draggedObject.GetComponentInParent<CollectCommand>();
+                if (collectCommand != null)
+                {
+                    Debug.Log("Command berhasil masuk (CollectCommand)");
+                    collectCommand.CreatePermanentClone(transform);
+                }
+                else
+                {
+                    Debug.LogWarning("Tidak ada script draggable yang ditemukan pada object yang di-drag");
+                }
             }
         }
         

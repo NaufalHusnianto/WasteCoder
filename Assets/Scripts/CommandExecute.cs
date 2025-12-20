@@ -11,6 +11,9 @@ public class CommandExecute : MonoBehaviour
     public float moveDuration = 0.5f;
     public float rotationDuration = 0.3f;
     
+    [Header("TRASH SETTINGS")]
+    public float collectDistance = 1.5f;
+    
     [Header("DEBUG")]
     public bool debugMode = true;
     
@@ -28,6 +31,14 @@ public class CommandExecute : MonoBehaviour
         if (commandManager == null)
         {
             commandManager = FindObjectOfType<CommandManager>();
+        }
+        
+        if (debugMode)
+        {
+            Debug.Log($"🤖 Robot Initialize:");
+            Debug.Log($"- Position: {initialPosition}");
+            Debug.Log($"- Move Distance: {moveDistance}");
+            Debug.Log($"- Collect Distance: {collectDistance}");
         }
     }
     
@@ -66,7 +77,6 @@ public class CommandExecute : MonoBehaviour
             
             if (command == "Empty") 
             {
-                if (debugMode) Debug.Log($"   ⏭️ Slot {i + 1}: Empty - Dilewati");
                 continue;
             }
             
@@ -86,12 +96,11 @@ public class CommandExecute : MonoBehaviour
                     yield return StartCoroutine(TurnRight());
                     break;
                     
-                default:
-                    if (debugMode) Debug.LogWarning($"   ⚠️ Command tidak dikenali: {command}");
+                case "CollectTrash":
+                    yield return StartCoroutine(CollectTrash());
                     break;
             }
             
-            // Jeda kecil antara command
             yield return new WaitForSeconds(0.1f);
         }
         
@@ -108,7 +117,6 @@ public class CommandExecute : MonoBehaviour
         Vector3 endPosition = startPosition + transform.forward * moveDistance;
         
         float elapsedTime = 0f;
-        
         while (elapsedTime < moveDuration)
         {
             transform.position = Vector3.Lerp(startPosition, endPosition, elapsedTime / moveDuration);
@@ -121,13 +129,12 @@ public class CommandExecute : MonoBehaviour
     
     private IEnumerator TurnLeft()
     {
-        if (debugMode) Debug.Log("      ↪️ Belok kiri...");
+        if (debugMode) Debug.Log("      ↩️ Belok kiri...");
         
         Quaternion startRotation = transform.rotation;
         Quaternion endRotation = startRotation * Quaternion.Euler(0, -90, 0);
         
         float elapsedTime = 0f;
-        
         while (elapsedTime < rotationDuration)
         {
             transform.rotation = Quaternion.Lerp(startRotation, endRotation, elapsedTime / rotationDuration);
@@ -146,7 +153,6 @@ public class CommandExecute : MonoBehaviour
         Quaternion endRotation = startRotation * Quaternion.Euler(0, 90, 0);
         
         float elapsedTime = 0f;
-        
         while (elapsedTime < rotationDuration)
         {
             transform.rotation = Quaternion.Lerp(startRotation, endRotation, elapsedTime / rotationDuration);
@@ -157,7 +163,75 @@ public class CommandExecute : MonoBehaviour
         transform.rotation = endRotation;
     }
     
-    public void ResetRobot()
+    // COLLECT TRASH: Sederhana untuk Level 1-3
+    private IEnumerator CollectTrash()
+    {
+        if (debugMode) Debug.Log("      🗑️ Mencari sampah...");
+        
+        // Cari semua sampah di scene
+        SimpleTrash[] simpleTrashArray = FindObjectsOfType<SimpleTrash>();
+        
+        if (debugMode) 
+            Debug.Log($"      🔍 Found: {simpleTrashArray.Length} SimpleTrash");
+        
+        bool foundTrash = false;
+        
+        // Cek SimpleTrash
+        foreach (SimpleTrash trash in simpleTrashArray)
+        {
+            if (trash.isCollectable)
+            {
+                foundTrash = true;
+                float distance = Vector3.Distance(transform.position, trash.transform.position);
+                
+                if (debugMode) 
+                    Debug.Log($"      📏 Distance to {trash.name}: {distance:F2} (Max: {collectDistance})");
+                
+                if (distance <= collectDistance)
+                {
+                    trash.Collect();
+                    if (debugMode) Debug.Log($"      ✅ {trash.name} dikumpulkan");
+                    
+                    yield return StartCoroutine(PlayCollectAnimation());
+                    yield break;
+                }
+            }
+        }
+        
+        if (!foundTrash)
+        {
+            if (debugMode) Debug.Log("      ❌ Tidak ada sampah di scene!");
+        }
+        else
+        {
+            if (debugMode) Debug.Log("      ❌ Semua sampah terlalu jauh!");
+        }
+        
+        yield return StartCoroutine(PlayFailAnimation());
+    }
+    
+    // ANIMASI
+    private IEnumerator PlayCollectAnimation()
+    {
+        Vector3 originalScale = transform.localScale;
+        transform.localScale = originalScale * 1.2f;
+        yield return new WaitForSeconds(0.2f);
+        transform.localScale = originalScale;
+    }
+    
+    private IEnumerator PlayFailAnimation()
+    {
+        for (int i = 0; i < 2; i++)
+        {
+            transform.localScale = Vector3.one * 0.9f;
+            yield return new WaitForSeconds(0.1f);
+            transform.localScale = Vector3.one;
+            yield return new WaitForSeconds(0.1f);
+        }
+    }
+    
+    // RESET: Reset semua objek di scene
+    public void ResetRobotAndEnvironment()
     {
         if (isExecuting)
         {
@@ -168,34 +242,40 @@ public class CommandExecute : MonoBehaviour
         StopAllCoroutines();
         isExecuting = false;
         
+        // 1. Reset robot
         transform.position = initialPosition;
         transform.rotation = initialRotation;
+        transform.localScale = Vector3.one;
         
         if (debugMode) Debug.Log("🔄 Robot direset ke posisi awal");
+        
+        // 2. Reset semua SimpleTrash di scene
+        ResetAllSimpleTrash();
     }
     
-    // Method untuk UI Button - Execute
+    private void ResetAllSimpleTrash()
+    {
+        SimpleTrash[] allSimpleTrash = FindObjectsOfType<SimpleTrash>();
+        foreach (SimpleTrash trash in allSimpleTrash)
+        {
+            trash.ResetTrash();
+        }
+        
+        if (debugMode && allSimpleTrash.Length > 0)
+            Debug.Log($"🔄 {allSimpleTrash.Length} SimpleTrash direset");
+    }
+    
+    // Public method untuk UI
+    public void ResetRobot()
+    {
+        ResetRobotAndEnvironment();
+    }
+    
     public void ExecuteCommandsButton()
     {
         ExecuteAllCommands();
     }
     
-    // Method untuk UI Button - Reset
-    public void ResetRobotButton()
-    {
-        ResetRobot();
-    }
-    
-    // Method untuk mengubah kecepatan eksekusi
-    public void SetExecutionSpeed(float speedMultiplier)
-    {
-        moveDuration = 0.5f / speedMultiplier;
-        rotationDuration = 0.3f / speedMultiplier;
-        
-        if (debugMode) Debug.Log($"🎚️ Kecepatan eksekusi diubah: {speedMultiplier}x");
-    }
-    
-    // Method untuk mengecek status eksekusi
     public bool IsExecuting()
     {
         return isExecuting;

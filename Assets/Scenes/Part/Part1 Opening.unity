@@ -508,6 +508,8 @@ MonoBehaviour:
   moveDistance: 1
   moveDuration: 0.5
   rotationDuration: 0.3
+  collectDistance: 0.5
+  depositDistance: 1
   debugMode: 1
 --- !u!1001 &107071879
 PrefabInstance:
@@ -1047,7 +1049,7 @@ MonoBehaviour:
         m_CallState: 2
       - m_Target: {fileID: 1877870262}
         m_TargetAssemblyTypeName: CommandExecute, Assembly-CSharp
-        m_MethodName: ResetRobotButton
+        m_MethodName: ResetRobotAndEnvironment
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -1340,7 +1342,7 @@ MonoBehaviour:
         m_CallState: 2
       - m_Target: {fileID: 1877870262}
         m_TargetAssemblyTypeName: CommandExecute, Assembly-CSharp
-        m_MethodName: ResetRobotButton
+        m_MethodName: ResetRobotAndEnvironment
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -4073,18 +4075,18 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   levelNumber: 1
+  levelType: 0
   requiredForwardCommands: 5
+  targetSimpleTrash: {fileID: 0}
+  targetTrashObject: {fileID: 0}
+  targetTrashBin: {fileID: 0}
   commandManager: {fileID: 665963968}
   commandExecute: {fileID: 87898086}
   successPopup: {fileID: 1436083935}
   failedPopup: {fileID: 1240614151}
   successText: {fileID: 0}
   failedText: {fileID: 0}
-  successSound: {fileID: 8300000, guid: 477c14ff16c971a45813e476d4b900db, type: 3}
-  failedSound: {fileID: 8300000, guid: 3ad742cb323b0594f927cad7a19d38b7, type: 3}
   debugMode: 1
-  dimLayer: {fileID: 0}
-  dimAlpha: 0.7
 --- !u!4 &861282713
 Transform:
   m_ObjectHideFlags: 0
@@ -5497,7 +5499,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &1240614152
 RectTransform:
   m_ObjectHideFlags: 0
@@ -5924,6 +5926,7 @@ GameObject:
   - component: {fileID: 1286240007}
   - component: {fileID: 1286240006}
   - component: {fileID: 1286240005}
+  - component: {fileID: 1286240009}
   m_Layer: 5
   m_Name: QuestButtonConfirm
   m_TagString: Untagged
@@ -6060,6 +6063,18 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 1
         m_CallState: 2
+      - m_Target: {fileID: 1286240009}
+        m_TargetAssemblyTypeName: SceneLoader, Assembly-CSharp
+        m_MethodName: LoadScene
+        m_Mode: 5
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: Part1 Level 2
+          m_BoolArgument: 1
+        m_CallState: 2
 --- !u!114 &1286240007
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -6098,6 +6113,18 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1286240003}
   m_CullTransparentMesh: 1
+--- !u!114 &1286240009
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1286240003}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 837ec32dbc1243f498053b91e98c8eb7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1001 &1298437357
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -6913,7 +6940,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &1511638932
 RectTransform:
   m_ObjectHideFlags: 0
@@ -8251,6 +8278,8 @@ MonoBehaviour:
   moveDistance: 1
   moveDuration: 0.5
   rotationDuration: 0.3
+  collectDistance: 0.5
+  depositDistance: 1
   debugMode: 0
 --- !u!1 &1935687642
 GameObject:
