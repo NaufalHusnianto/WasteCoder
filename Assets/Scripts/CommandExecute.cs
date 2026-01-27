@@ -13,6 +13,15 @@ public class CommandExecute : MonoBehaviour
     
     [Header("TRASH SETTINGS")]
     public float collectDistance = 1.5f;
+
+    [Header("SOUND EFFECTS")]
+    public AudioSource audioSource;
+    public AudioClip moveSound;
+    public AudioClip turnSound;
+    public AudioClip collectSound;
+    public AudioClip failSound;
+    public float moveSoundVolume = 0.5f;
+    public float turnSoundVolume = 0.3f;
     
     [Header("DEBUG")]
     public bool debugMode = true;
@@ -112,6 +121,8 @@ public class CommandExecute : MonoBehaviour
     private IEnumerator MoveForward()
     {
         if (debugMode) Debug.Log("      🚶 Bergerak maju...");
+
+        PlaySound(moveSound, moveSoundVolume);
         
         Vector3 startPosition = transform.position;
         Vector3 endPosition = startPosition + transform.forward * moveDistance;
@@ -130,6 +141,8 @@ public class CommandExecute : MonoBehaviour
     private IEnumerator TurnLeft()
     {
         if (debugMode) Debug.Log("      ↩️ Belok kiri...");
+
+        PlaySound(turnSound, turnSoundVolume);
         
         Quaternion startRotation = transform.rotation;
         Quaternion endRotation = startRotation * Quaternion.Euler(0, -90, 0);
@@ -148,6 +161,8 @@ public class CommandExecute : MonoBehaviour
     private IEnumerator TurnRight()
     {
         if (debugMode) Debug.Log("      ↪️ Belok kanan...");
+
+        PlaySound(turnSound, turnSoundVolume);
         
         Quaternion startRotation = transform.rotation;
         Quaternion endRotation = startRotation * Quaternion.Euler(0, 90, 0);
@@ -167,6 +182,8 @@ public class CommandExecute : MonoBehaviour
     private IEnumerator CollectTrash()
     {
         if (debugMode) Debug.Log("      🗑️ Mencari sampah...");
+
+        PlaySound(collectSound);
         
         // Cari semua sampah di scene
         SimpleTrash[] simpleTrashArray = FindObjectsOfType<SimpleTrash>();
@@ -221,6 +238,7 @@ public class CommandExecute : MonoBehaviour
     
     private IEnumerator PlayFailAnimation()
     {
+        PlaySound(failSound);
         for (int i = 0; i < 2; i++)
         {
             transform.localScale = Vector3.one * 0.9f;
@@ -279,5 +297,17 @@ public class CommandExecute : MonoBehaviour
     public bool IsExecuting()
     {
         return isExecuting;
+    }
+
+    private void PlaySound(AudioClip clip, float volume = 1.0f)
+    {
+        if (audioSource != null && clip != null)
+        {
+            audioSource.PlayOneShot(clip, volume);
+        }
+        else
+        {
+            if (debugMode) Debug.LogWarning($"Sound effect tidak ditemukan: {clip?.name}");
+        }
     }
 }

@@ -55,11 +55,11 @@ PrefabInstance:
     - target: {fileID: -5696426144281492809, guid: e942c1ff86d060c4a9e8b3d8b1cc9d01, type: 3}
       propertyPath: 'm_Materials.Array.data[0]'
       value: 
-      objectReference: {fileID: 2100000, guid: 6483aca1840cc084dbf0e85c92d3ee19, type: 2}
+      objectReference: {fileID: 2100000, guid: a2a6833b868980344999a58645b72ea8, type: 2}
     - target: {fileID: -3495986005548864925, guid: e942c1ff86d060c4a9e8b3d8b1cc9d01, type: 3}
       propertyPath: 'm_Materials.Array.data[0]'
       value: 
-      objectReference: {fileID: 2100000, guid: 6483aca1840cc084dbf0e85c92d3ee19, type: 2}
+      objectReference: {fileID: 2100000, guid: a2a6833b868980344999a58645b72ea8, type: 2}
     - target: {fileID: 919132149155446097, guid: e942c1ff86d060c4a9e8b3d8b1cc9d01, type: 3}
       propertyPath: m_Name
       value: AnorganicTrash
@@ -96,6 +96,3 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   trashType: 1
   isCollectable: 1
-  organikMaterial: {fileID: 0}
-  anorganikMaterial: {fileID: 0}
-  collectParticles: {fileID: 0}

@@ -24,6 +24,11 @@ public class LevelManager : MonoBehaviour
     public GameObject failedPopup;
     public Text successText;
     public Text failedText;
+
+    [Header("SOUND EFFECTS")]
+    public AudioSource audioSource;
+    public AudioClip successSound;
+    public AudioClip failedSound;
     
     [Header("DEBUG")]
     public bool debugMode = true;
@@ -242,6 +247,8 @@ public class LevelManager : MonoBehaviour
         {
             successPopup.SetActive(true);
         }
+
+        PlaySound(successSound);
         
         // Save level progress
         PlayerPrefs.SetInt("LevelCompleted", levelNumber);
@@ -256,6 +263,8 @@ public class LevelManager : MonoBehaviour
         {
             failedPopup.SetActive(true);
         }
+
+        PlaySound(failedSound);
     }
     
     // Method untuk UI Button
@@ -329,6 +338,18 @@ public class LevelManager : MonoBehaviour
                 if (targetSimpleTrash != null)
                     Debug.Log($"SimpleTrash: Collectable={targetSimpleTrash.isCollectable}");
                 break;
+        }
+    }
+
+    private void PlaySound(AudioClip clip)
+    {
+        if (audioSource != null && clip != null)
+        {
+            audioSource.PlayOneShot(clip);
+        }
+        else
+        {
+            if (debugMode) Debug.LogWarning($"Sound effect tidak ditemukan atau AudioSource belum di-set: {clip?.name}");
         }
     }
 }
