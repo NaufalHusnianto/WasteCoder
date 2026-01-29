@@ -7,6 +7,9 @@ public class RobotExecutePart2 : MonoBehaviour
     [Header("REFERENCES")]
     public CommandManagerPart2 commandManager;
     
+    [Header("ARROW INDICATOR")]
+    public CommandArrowIndicator arrowIndicator;
+    
     [Header("MOVEMENT SETTINGS")]
     public float moveDistance = 1f;
     public float moveDuration = 0.5f;
@@ -15,6 +18,16 @@ public class RobotExecutePart2 : MonoBehaviour
     [Header("SENSOR SETTINGS")]
     public float sensorRange = 2f;
     public float collectRange = 1.5f;
+    
+    [Header("SOUND EFFECTS")]
+    public AudioSource audioSource;
+    public AudioClip moveSound;
+    public AudioClip turnSound;
+    public AudioClip collectSound;
+    public AudioClip depositSound;
+    public AudioClip failSound;
+    public float moveSoundVolume = 0.5f;
+    public float turnSoundVolume = 0.3f;
     
     [Header("DEBUG")]
     public bool debugMode = true;
@@ -29,8 +42,27 @@ public class RobotExecutePart2 : MonoBehaviour
         initialPosition = transform.position;
         initialRotation = transform.rotation;
         
+        // Cari reference jika belum diassign
         if (commandManager == null)
             commandManager = FindObjectOfType<CommandManagerPart2>();
+            
+        if (arrowIndicator == null)
+            arrowIndicator = FindObjectOfType<CommandArrowIndicator>();
+            
+        if (audioSource == null)
+            audioSource = GetComponent<AudioSource>();
+            
+        if (audioSource == null && gameObject.GetComponent<AudioSource>() == null)
+            audioSource = gameObject.AddComponent<AudioSource>();
+        
+        if (debugMode)
+        {
+            Debug.Log($"🤖 Robot Part 2 Initialize:");
+            Debug.Log($"- Position: {initialPosition}");
+            Debug.Log($"- Move Distance: {moveDistance}");
+            Debug.Log($"- Collect Range: {collectRange}");
+            Debug.Log($"- Arrow Indicator: {arrowIndicator != null}");
+        }
     }
     
     public void ExecuteCommands()
@@ -47,23 +79,34 @@ public class RobotExecutePart2 : MonoBehaviour
     IEnumerator ExecuteRoutine()
     {
         isExecuting = true;
+        
+        // Start arrow indicator
+        if (arrowIndicator != null)
+        {
+            // Delay sedikit untuk sinkronisasi
+            Invoke("StartArrowIndicator", 0.3f);
+        }
+        
         string[] commands = commandManager.GetCommandArray();
         
         // DEBUG: Tampilkan array
-        Debug.Log("📋 COMMAND ARRAY SEBELUM EKSEKUSI:");
-        for (int i = 0; i < commands.Length; i++)
+        if (debugMode)
         {
-            Debug.Log($"  [{i}] {commands[i]}");
+            Debug.Log("📋 COMMAND ARRAY SEBELUM EKSEKUSI:");
+            for (int i = 0; i < commands.Length; i++)
+            {
+                Debug.Log($"  [{i}] {commands[i]}");
+            }
+            
+            Debug.Log("🚀 Robot Part 2 mulai eksekusi...");
         }
-        
-        Debug.Log("🚀 Robot Part 2 mulai eksekusi...");
         
         for (int i = 0; i < commands.Length; i++)
         {
             string cmd = commands[i];
             if (cmd == "Empty") continue;
             
-            Debug.Log($"   [{i+1}] {cmd}");
+            if (debugMode) Debug.Log($"   [{i+1}] {cmd}");
             
             // ======== HANDLE PERCABANGAN ========
             if (cmd == "IF_ORGANIK" || cmd == "IF_ANORGANIK")
@@ -71,24 +114,24 @@ public class RobotExecutePart2 : MonoBehaviour
                 string expectedType = cmd == "IF_ORGANIK" ? "Organik" : "Anorganik";
                 bool conditionTrue = (carriedTrash == expectedType);
                 
-                Debug.Log($"   🔍 IF {expectedType}: Bawa {carriedTrash} -> {conditionTrue}");
+                if (debugMode) Debug.Log($"   🔍 IF {expectedType}: Bawa {carriedTrash} -> {conditionTrue}");
                 
                 // Cari END_IF
                 int endIfIndex = FindEndIfIndex(commands, i);
                 
                 // DEBUG: Tampilkan blok IF
-                Debug.Log($"   📍 Blok IF dari index {i+1} sampai {endIfIndex+1}");
+                if (debugMode) Debug.Log($"   📍 Blok IF dari index {i+1} sampai {endIfIndex+1}");
                 
                 // Eksekusi jika kondisi benar
                 if (conditionTrue)
                 {
-                    Debug.Log("   ✅ Jalankan blok IF");
+                    if (debugMode) Debug.Log("   ✅ Jalankan blok IF");
                     i++; // Lewati IF command
                     while (i < endIfIndex && commands[i] != "ELSE")
                     {
                         if (commands[i] != "Empty" && commands[i] != "END_IF")
                         {
-                            Debug.Log($"   ▶️ Eksekusi dalam IF: {commands[i]}");
+                            if (debugMode) Debug.Log($"   ▶️ Eksekusi dalam IF: {commands[i]}");
                             yield return ExecuteSingleCommand(commands[i]);
                         }
                         i++;
@@ -96,12 +139,12 @@ public class RobotExecutePart2 : MonoBehaviour
                 }
                 else // Kondisi salah, skip ke ELSE
                 {
-                    Debug.Log("   ❌ Skip ke ELSE");
+                    if (debugMode) Debug.Log("   ❌ Skip ke ELSE");
                     i++; // Lewati IF command
                     // Cari ELSE
                     while (i < endIfIndex && commands[i] != "ELSE")
                     {
-                        Debug.Log($"   ⏭️ Skip: {commands[i]}");
+                        if (debugMode) Debug.Log($"   ⏭️ Skip: {commands[i]}");
                         i++; // Skip semua command sampai ELSE
                     }
                     
@@ -113,7 +156,7 @@ public class RobotExecutePart2 : MonoBehaviour
                         {
                             if (commands[i] != "Empty" && commands[i] != "END_IF")
                             {
-                                Debug.Log($"   ▶️ Eksekusi dalam ELSE: {commands[i]}");
+                                if (debugMode) Debug.Log($"   ▶️ Eksekusi dalam ELSE: {commands[i]}");
                                 yield return ExecuteSingleCommand(commands[i]);
                             }
                             i++;
@@ -129,8 +172,31 @@ public class RobotExecutePart2 : MonoBehaviour
             yield return ExecuteSingleCommand(cmd);
         }
         
-        Debug.Log("✅ Eksekusi selesai!");
+        if (debugMode) Debug.Log("✅ Eksekusi selesai!");
+        
+        // Stop arrow indicator setelah delay
+        if (arrowIndicator != null)
+            Invoke("StopArrowIndicator", 1f);
+            
         isExecuting = false;
+    }
+    
+    // Method untuk memulai arrow indicator
+    private void StartArrowIndicator()
+    {
+        if (arrowIndicator != null)
+        {
+            arrowIndicator.StartFollowing();
+        }
+    }
+    
+    // Method untuk menghentikan arrow indicator
+    private void StopArrowIndicator()
+    {
+        if (arrowIndicator != null)
+        {
+            arrowIndicator.StopFollowing();
+        }
     }
 
     // FIX method FindEndIfIndex:
@@ -140,7 +206,7 @@ public class RobotExecutePart2 : MonoBehaviour
         {
             if (commands[i] == "END_IF") 
             {
-                Debug.Log($"   🔎 END_IF ditemukan di index {i}");
+                if (debugMode) Debug.Log($"   🔎 END_IF ditemukan di index {i}");
                 return i;
             }
         }
@@ -178,13 +244,15 @@ public class RobotExecutePart2 : MonoBehaviour
                 break;
         }
         
-        yield return new WaitForSeconds(0.1f);
+        yield return new WaitForSeconds(0.5f);
     }
     
     // COLLECT TRASH dengan ConditionalTrash
     IEnumerator CollectTrash()
     {
         if (debugMode) Debug.Log("   🔍 Mencari sampah...");
+
+        // yield return new WaitForSeconds(0.2f);
         
         // Cari semua ConditionalTrash di scene
         ConditionalTrash[] allTrash = FindObjectsOfType<ConditionalTrash>();
@@ -202,11 +270,14 @@ public class RobotExecutePart2 : MonoBehaviour
                 
                 if (distance <= collectRange)
                 {
+                    // Play sound
+                    PlaySound(collectSound);
+                    
                     // Ambil sampah
                     carriedTrash = trash.GetTrashType().ToString();
                     trash.Collect(); // Ini akan memanggil gameObject.SetActive(false)
                     
-                    Debug.Log($"   📦 Mengambil sampah: {carriedTrash}");
+                    if (debugMode) Debug.Log($"   📦 Mengambil sampah: {carriedTrash}");
                     foundTrash = true;
                     
                     yield return StartCoroutine(PlayCollectAnimation());
@@ -217,7 +288,8 @@ public class RobotExecutePart2 : MonoBehaviour
         
         if (!foundTrash)
         {
-            Debug.Log("   ❌ Tidak ada sampah di dekat robot!");
+            if (debugMode) Debug.Log("   ❌ Tidak ada sampah di dekat robot!");
+            PlaySound(failSound);
             yield return StartCoroutine(PlayFailAnimation());
         }
     }
@@ -225,9 +297,12 @@ public class RobotExecutePart2 : MonoBehaviour
     // DEPOSIT TRASH ke TrashBin
     IEnumerator DepositTrash()
     {
+        // yield return new WaitForSeconds(0.2f);
+
         if (carriedTrash == "None")
         {
-            Debug.Log("   ❌ Tidak membawa sampah!");
+            if (debugMode) Debug.Log("   ❌ Tidak membawa sampah!");
+            PlaySound(failSound);
             yield return StartCoroutine(PlayFailAnimation());
             yield break;
         }
@@ -249,27 +324,35 @@ public class RobotExecutePart2 : MonoBehaviour
                 
                 if (jenisCocok)
                 {
+                    // Play sound
+                    PlaySound(depositSound);
+                    
                     // Buang sampah
                     bin.PlaySuccessEffect();
                     carriedTrash = "None";
                     
-                    Debug.Log($"   ✅ Sampah dibuang di tempat yang benar!");
+                    if (debugMode) Debug.Log($"   ✅ Sampah dibuang di tempat yang benar!");
                     yield return StartCoroutine(PlayCollectAnimation());
                     yield break;
                 }
                 else
                 {
-                    Debug.Log($"   ❌ Jenis sampah tidak cocok!");
+                    if (debugMode) Debug.Log($"   ❌ Jenis sampah tidak cocok!");
                 }
             }
         }
         
-        Debug.Log("   ❌ Tidak ada tempat sampah yang cocok!");
+        if (debugMode) Debug.Log("   ❌ Tidak ada tempat sampah yang cocok!");
+        PlaySound(failSound);
         yield return StartCoroutine(PlayFailAnimation());
     }
     
     IEnumerator MoveForward()
     {
+        if (debugMode) Debug.Log("      🚶 Bergerak maju...");
+        
+        PlaySound(moveSound, moveSoundVolume);
+        
         Vector3 startPos = transform.position;
         Vector3 endPos = startPos + transform.forward * moveDistance;
         
@@ -285,6 +368,11 @@ public class RobotExecutePart2 : MonoBehaviour
     
     IEnumerator Rotate(float angle)
     {
+        string direction = angle > 0 ? "kanan" : "kiri";
+        if (debugMode) Debug.Log($"      ↩️ Belok {direction}...");
+        
+        PlaySound(turnSound, turnSoundVolume);
+        
         Quaternion startRot = transform.rotation;
         Quaternion endRot = startRot * Quaternion.Euler(0, angle, 0);
         
@@ -296,6 +384,8 @@ public class RobotExecutePart2 : MonoBehaviour
             yield return null;
         }
         transform.rotation = endRot;
+        
+        // yield return new WaitForSeconds(0.1f);
     }
     
     IEnumerator PlayCollectAnimation()
@@ -317,6 +407,30 @@ public class RobotExecutePart2 : MonoBehaviour
         }
     }
     
+    // Method untuk UI
+    public void OnExecuteButton()
+    {
+        // Eksekusi command
+        ExecuteCommands();
+        
+        // Start arrow dengan delay
+        if (arrowIndicator != null)
+        {
+            Invoke("StartArrowIndicator", 0.5f);
+        }
+    }
+    
+    public void OnResetButtonClicked()
+    {
+        ResetRobot();
+        
+        // Stop arrow indicator
+        if (arrowIndicator != null)
+        {
+            arrowIndicator.OnResetButtonClicked();
+        }
+    }
+    
     // Method untuk LevelManager
     public bool IsExecuting()
     {
@@ -335,6 +449,7 @@ public class RobotExecutePart2 : MonoBehaviour
         carriedTrash = "None";
         transform.position = initialPosition;
         transform.rotation = initialRotation;
+        transform.localScale = Vector3.one;
         
         // Reset semua ConditionalTrash
         ConditionalTrash[] allTrash = FindObjectsOfType<ConditionalTrash>();
@@ -350,6 +465,18 @@ public class RobotExecutePart2 : MonoBehaviour
             bin.StopEffects();
         }
         
-        Debug.Log("🔄 Robot dan lingkungan direset");
+        if (debugMode) Debug.Log("🔄 Robot dan lingkungan direset");
+    }
+    
+    private void PlaySound(AudioClip clip, float volume = 1.0f)
+    {
+        if (audioSource != null && clip != null)
+        {
+            audioSource.PlayOneShot(clip, volume);
+        }
+        else
+        {
+            if (debugMode) Debug.LogWarning($"Sound effect tidak ditemukan: {clip?.name}");
+        }
     }
 }

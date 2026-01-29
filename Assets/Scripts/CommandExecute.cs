@@ -25,6 +25,9 @@ public class CommandExecute : MonoBehaviour
     
     [Header("DEBUG")]
     public bool debugMode = true;
+
+    [Header("ARROW INDICATOR")]
+    public CommandArrowIndicator arrowIndicator;
     
     private bool isExecuting = false;
     private Vector3 initialPosition;
@@ -71,6 +74,13 @@ public class CommandExecute : MonoBehaviour
     private IEnumerator ExecuteCommandsCoroutine()
     {
         isExecuting = true;
+
+        // Notify arrow indicator
+        if (arrowIndicator == null)
+            arrowIndicator = FindObjectOfType<CommandArrowIndicator>();
+            
+        if (arrowIndicator != null)
+            arrowIndicator.StartFollowing();
         
         string[] commands = commandManager.GetCommandArray();
         
@@ -110,12 +120,32 @@ public class CommandExecute : MonoBehaviour
                     break;
             }
             
-            yield return new WaitForSeconds(0.1f);
+            yield return new WaitForSeconds(0.3f);
         }
         
         if (debugMode) Debug.Log("✅ **EKSEKUSI COMMAND SELESAI**");
         
         isExecuting = false;
+
+        // Optional: Stop arrow after delay
+        if (arrowIndicator != null)
+            Invoke("StopArrowIndicator", 1f);
+    }
+
+    private void StopArrowIndicator()
+    {
+        if (arrowIndicator != null)
+            arrowIndicator.StopFollowing();
+    }
+
+    public void OnExecuteButton()
+    {
+        // Eksekusi command
+        ExecuteAllCommands();
+        
+        // Start arrow
+        if (arrowIndicator != null)
+            arrowIndicator.OnExecuteButtonClicked();
     }
     
     private IEnumerator MoveForward()
@@ -154,6 +184,8 @@ public class CommandExecute : MonoBehaviour
             elapsedTime += Time.deltaTime;
             yield return null;
         }
+
+        yield return new WaitForSeconds(0.2f);
         
         transform.rotation = endRotation;
     }
@@ -174,6 +206,8 @@ public class CommandExecute : MonoBehaviour
             elapsedTime += Time.deltaTime;
             yield return null;
         }
+
+        yield return new WaitForSeconds(0.2f);
         
         transform.rotation = endRotation;
     }
@@ -182,6 +216,9 @@ public class CommandExecute : MonoBehaviour
     private IEnumerator CollectTrash()
     {
         if (debugMode) Debug.Log("      🗑️ Mencari sampah...");
+
+        // delay time
+        yield return new WaitForSeconds(0.2f);
 
         PlaySound(collectSound);
         
@@ -192,6 +229,7 @@ public class CommandExecute : MonoBehaviour
             Debug.Log($"      🔍 Found: {simpleTrashArray.Length} SimpleTrash");
         
         bool foundTrash = false;
+
         
         // Cek SimpleTrash
         foreach (SimpleTrash trash in simpleTrashArray)
@@ -232,7 +270,7 @@ public class CommandExecute : MonoBehaviour
     {
         Vector3 originalScale = transform.localScale;
         transform.localScale = originalScale * 1.2f;
-        yield return new WaitForSeconds(0.2f);
+        yield return new WaitForSeconds(0.5f);
         transform.localScale = originalScale;
     }
     
