@@ -2276,16 +2276,25 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3153158024985497615, guid: 09925523498b8004a83aa918258d2c42, type: 3}
       propertyPath: m_Text
-      value: "Kesimpulan dari materi pertama tentang Gerakan dan Urutan adalah: kunci
-        mengendalikan robot dan dalam belajar algoritma pemrograman ada di logika
-        dan perencanaan yang runtut. \n\nDi game ini, kamu sudah praktik langsung:
-        robot hanya akan bergerak sesuai perintah yang kamu susun, dalam urutan yang
-        tepat. Jika salah urutan, hasilnya akan meleset. \n\nInilah konsep algoritma
-        yang sesungguhnya merancang langkah-langkah sistematis untuk menyelesaikan
-        masalah. Dengan menguasai bagian ini, kamu melatih cara berpikir terstruktur
-        yang bisa dipakai untuk menyelesaikan tugas-tugas lain, baik di pelajaran
-        lain maupun di kehidupan sehari-hari. Intinya: urutan itu penting, dan setiap
-        langkah kecil menentukan hasil akhir."
+      value: 'Di game ini, kamu sudah praktik langsung: robot tidak lagi hanya bergerak
+        lurus, tetapi bisa mengambil jalur berbeda berdasarkan jenis sampah yang
+        dideteksi. Organik atau anorganik? Semua tergantung pada keputusan logis
+        yang kamu buat.
+
+        
+
+        Inilah konsep percabangan dalam algoritma:
+        memberikan kemampuan untuk mengambil keputusan berdasarkan situasi. Dengan
+        menguasai bagian ini, kamu melatih cara berpikir analitis dan adaptif mampu
+        mengevaluasi kondisi, mempertimbangkan opsi, dan memilih jalan terbaik, persis
+        seperti saat memilah sampah.
+
+        
+
+        Ketika kamu menghadapi
+        tantangan di pelajaran lain atau di kehidupan sehari-hari, ingatlah: setiap
+        keputusan membuka jalan baru. Kemampuan membuat pilihan tepat adalah kunci
+        menyelesaikan masalah.'
       objectReference: {fileID: 0}
     - target: {fileID: 3153158024985497615, guid: 09925523498b8004a83aa918258d2c42, type: 3}
       propertyPath: m_Color.b

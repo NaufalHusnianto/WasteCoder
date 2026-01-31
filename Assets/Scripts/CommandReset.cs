@@ -53,10 +53,21 @@ public class CommandReset : MonoBehaviour
         }
 
         int totalDeleted = 0;
+        int staticSkipped = 0;
 
         // Loop melalui semua slot
         foreach (Transform slot in commandContainer.transform)
         {
+            // Cek apakah slot memiliki komponen CommandSlot
+            CommandSlot commandSlot = slot.GetComponent<CommandSlot>();
+            
+            if (commandSlot != null && commandSlot.staticSlot)
+            {
+                staticSkipped++;
+                Debug.Log($"⏭️ Lewati static slot: {slot.name}");
+                continue;
+            }
+            
             int childrenInSlot = slot.childCount;
             
             if (childrenInSlot > 0)
@@ -75,7 +86,7 @@ public class CommandReset : MonoBehaviour
             }
         }
 
-        Debug.Log($"✅ Reset selesai! {totalDeleted} command dihapus.");
+        Debug.Log($"✅ Reset selesai! {totalDeleted} command dihapus, {staticSkipped} static slot dilewati.");
 
         // Refresh CommandManager jika ada
         RefreshCommandManager();

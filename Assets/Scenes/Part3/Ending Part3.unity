@@ -2276,16 +2276,27 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3153158024985497615, guid: 09925523498b8004a83aa918258d2c42, type: 3}
       propertyPath: m_Text
-      value: "Kesimpulan dari materi pertama tentang Gerakan dan Urutan adalah: kunci
-        mengendalikan robot dan dalam belajar algoritma pemrograman ada di logika
-        dan perencanaan yang runtut. \n\nDi game ini, kamu sudah praktik langsung:
-        robot hanya akan bergerak sesuai perintah yang kamu susun, dalam urutan yang
-        tepat. Jika salah urutan, hasilnya akan meleset. \n\nInilah konsep algoritma
-        yang sesungguhnya merancang langkah-langkah sistematis untuk menyelesaikan
-        masalah. Dengan menguasai bagian ini, kamu melatih cara berpikir terstruktur
-        yang bisa dipakai untuk menyelesaikan tugas-tugas lain, baik di pelajaran
-        lain maupun di kehidupan sehari-hari. Intinya: urutan itu penting, dan setiap
-        langkah kecil menentukan hasil akhir."
+      value: 'Di game ini, kamu sudah praktik langsung: robot tidak lagi hanya bergerak
+        atau memilih jalur sekali saja, tetapi dapat mengulangi tugas pemilahan sampah
+        secara konsisten. Ambil, pilah, buang ulangi hingga semua sampah tertangani.
+        Tidak perlu menulis perintah yang sama berulang kali, cukup atur polanya
+        sekali, dan biarkan algoritma bekerja.
+
+        
+
+        Inilah konsep
+        perulangan dalam algoritma: memberikan kemampuan untuk melakukan tugas berulang
+        dengan efisien. Dengan menguasai bagian ini, kamu melatih cara berpikir yang
+        sistematis dan melihat pola mampu mengidentifikasi tugas berulang dalam kehidupan
+        nyata.
+
+        
+
+        Ketika kamu menghadapi rutinitas di pelajaran
+        lain atau di kehidupan sehari-hari, ingatlah: konsistensi dalam hal kecil 
+        seperti memilah sampah setiap hari mampu menciptakan perubahan besar. Perulangan
+        bukan hanya soal pengulangan, tapi juga tentang konsistensi yang berbuah
+        hasil.'
       objectReference: {fileID: 0}
     - target: {fileID: 3153158024985497615, guid: 09925523498b8004a83aa918258d2c42, type: 3}
       propertyPath: m_Color.b
