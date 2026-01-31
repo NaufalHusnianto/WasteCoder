@@ -25,6 +25,14 @@ public class LevelManagerPart2 : MonoBehaviour
     public bool requireIfCommand = true;
     public bool requireCorrectSorting = true;
     
+    [Header("SOUND EFFECTS")]
+    public AudioSource audioSource;
+    public AudioClip successSound;
+    public AudioClip failedSound;
+    
+    [Header("DEBUG")]
+    public bool debugMode = true;
+    
     private bool levelCompleted = false;
     private bool trashWasCollectable = false;
     
@@ -49,6 +57,14 @@ public class LevelManagerPart2 : MonoBehaviour
         // Auto find references
         if (commandManager == null) commandManager = FindObjectOfType<CommandManagerPart2>();
         if (robot == null) robot = FindObjectOfType<RobotExecutePart2>();
+        
+        // Find AudioSource jika belum di-set
+        if (audioSource == null)
+        {
+            audioSource = GetComponent<AudioSource>();
+            if (audioSource == null && debugMode)
+                Debug.LogWarning("AudioSource tidak ditemukan di GameObject ini");
+        }
         
         // Simpan status awal
         if (targetTrash != null)
@@ -124,10 +140,13 @@ public class LevelManagerPart2 : MonoBehaviour
         string[] commands = commandManager.GetCommandArray();
         
         // DEBUG: Tampilkan command array
-        Debug.Log("📋 COMMAND ARRAY UNTUK VALIDASI:");
-        for (int i = 0; i < commands.Length; i++)
+        if (debugMode)
         {
-            Debug.Log($"  [{i}] {commands[i]}");
+            Debug.Log("📋 COMMAND ARRAY UNTUK VALIDASI:");
+            for (int i = 0; i < commands.Length; i++)
+            {
+                Debug.Log($"  [{i}] {commands[i]}");
+            }
         }
         
         // 1. Validasi algoritma
@@ -139,7 +158,8 @@ public class LevelManagerPart2 : MonoBehaviour
         // 3. Validasi hasil
         bool resultValid = ValidateResult();
         
-        Debug.Log($"📊 Validasi Final: Algoritma={algorithmValid}, Logic={logicValid}, Result={resultValid}");
+        if (debugMode)
+            Debug.Log($"📊 Validasi Final: Algoritma={algorithmValid}, Logic={logicValid}, Result={resultValid}");
         
         return algorithmValid && logicValid && resultValid;
     }
@@ -189,12 +209,15 @@ public class LevelManagerPart2 : MonoBehaviour
             else if (cmd == "END_IF") endIfCount++;
         }
         
-        // Tampilkan analisis
-        Debug.Log($"📊 Analisis Algoritma:");
-        Debug.Log($"- IF Command: {hasIf} ({ifCount}x)");
-        Debug.Log($"- AmbilSampah: {hasCollect}");
-        Debug.Log($"- BuangSampah: {hasDeposit}");
-        Debug.Log($"- END_IF: {endIfCount}x");
+        // Tampilkan analisis jika debug mode aktif
+        if (debugMode)
+        {
+            Debug.Log($"📊 Analisis Algoritma:");
+            Debug.Log($"- IF Command: {hasIf} ({ifCount}x)");
+            Debug.Log($"- AmbilSampah: {hasCollect}");
+            Debug.Log($"- BuangSampah: {hasDeposit}");
+            Debug.Log($"- END_IF: {endIfCount}x");
+        }
         
         // Cek kesalahan
         if (ifCount > endIfCount)
@@ -243,10 +266,13 @@ public class LevelManagerPart2 : MonoBehaviour
             correctSorting = (carriedTrash == "None"); // Robot tidak membawa sampah = sudah dibuang
         }
         
-        Debug.Log($"📊 Hasil Pembersihan:");
-        Debug.Log($"- Sampah diambil: {trashCollected}");
-        Debug.Log($"- Robot bawa sampah: {robot.GetCarriedTrash()}");
-        Debug.Log($"- Sorting benar: {correctSorting}");
+        if (debugMode)
+        {
+            Debug.Log($"📊 Hasil Pembersihan:");
+            Debug.Log($"- Sampah diambil: {trashCollected}");
+            Debug.Log($"- Robot bawa sampah: {robot.GetCarriedTrash()}");
+            Debug.Log($"- Sorting benar: {correctSorting}");
+        }
         
         return trashCollected && correctSorting;
     }
@@ -254,7 +280,9 @@ public class LevelManagerPart2 : MonoBehaviour
     void LevelSuccess()
     {
         levelCompleted = true;
-        Debug.Log("🎉 LEVEL BERHASIL!");
+        
+        if (debugMode)
+            Debug.Log("🎉 LEVEL BERHASIL!");
         
         if (successPanel != null)
         {
@@ -263,6 +291,9 @@ public class LevelManagerPart2 : MonoBehaviour
         
         ShowMessage("SUKSES! Algoritma IF benar dan sampah terpilah!", Color.green);
         
+        // Play success sound
+        PlaySound(successSound);
+        
         // Save progress
         PlayerPrefs.SetInt("LevelPart2", levelNumber);
         PlayerPrefs.Save();
@@ -270,7 +301,8 @@ public class LevelManagerPart2 : MonoBehaviour
     
     void LevelFailed()
     {
-        Debug.Log("❌ LEVEL GAGAL");
+        if (debugMode)
+            Debug.Log("❌ LEVEL GAGAL");
         
         if (failedPanel != null)
         {
@@ -278,6 +310,9 @@ public class LevelManagerPart2 : MonoBehaviour
         }
         
         ShowMessage("Coba perbaiki algoritma!", Color.red);
+        
+        // Play failed sound
+        PlaySound(failedSound);
     }
     
     void ShowMessage(string message, Color color)
@@ -287,7 +322,9 @@ public class LevelManagerPart2 : MonoBehaviour
             feedbackText.text = message;
             feedbackText.color = color;
         }
-        Debug.Log(message);
+        
+        if (debugMode)
+            Debug.Log(message);
     }
     
     // DIPANGGIL DARI BUTTON UI
@@ -330,7 +367,8 @@ public class LevelManagerPart2 : MonoBehaviour
             feedbackText.color = Color.white;
         }
         
-        Debug.Log("🔄 Level direset");
+        if (debugMode)
+            Debug.Log("🔄 Level direset");
     }
     
     // Untuk debug
@@ -344,6 +382,19 @@ public class LevelManagerPart2 : MonoBehaviour
         if (targetTrash != null)
         {
             Debug.Log($"Target trash: {targetTrash.GetTrashType()} (Collectable: {targetTrash.IsCollectable()})");
+        }
+    }
+    
+    private void PlaySound(AudioClip clip)
+    {
+        if (audioSource != null && clip != null)
+        {
+            audioSource.PlayOneShot(clip);
+        }
+        else
+        {
+            if (debugMode) 
+                Debug.LogWarning($"Sound effect tidak ditemukan atau AudioSource belum di-set: {clip?.name}");
         }
     }
 }

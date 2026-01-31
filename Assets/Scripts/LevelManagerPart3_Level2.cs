@@ -29,9 +29,17 @@ public class LevelManagerPart3_Level2 : MonoBehaviour
     public GameObject successPanel;
     public GameObject failedPanel;
     
+    [Header("SOUND EFFECTS")]
+    public AudioSource audioSource;
+    public AudioClip successSound;
+    public AudioClip failedSound;
+    
     [Header("LEVEL REQUIREMENTS")]
     public int requiredTrashCount = 4; // Harus ambil 4 sampah
     public bool requireLoopForCollection = true; // Wajib pakai LOOP
+    
+    [Header("DEBUG")]
+    public bool debugMode = true;
     
     private bool levelCompleted = false;
     private bool[] trashCollected; // Status pengambilan sampah
@@ -82,24 +90,35 @@ public class LevelManagerPart3_Level2 : MonoBehaviour
         if (commandManager == null) commandManager = FindObjectOfType<CommandManagerPart3>();
         if (robot == null) robot = FindObjectOfType<RobotExecutePart3>();
         
+        // Find AudioSource jika belum di-set
+        if (audioSource == null)
+        {
+            audioSource = GetComponent<AudioSource>();
+            if (audioSource == null && debugMode)
+                Debug.LogWarning("AudioSource tidak ditemukan di GameObject ini");
+        }
+        
         // HAPUS SetupTrashPositions() dari sini!
         // Biarkan posisi sampah seperti yang sudah diatur di Editor
         
-        Debug.Log($"🎮 Level {levelNumber} Part 3 siap!");
-        Debug.Log($"🎯 Target: Ambil {requiredTrashCount} sampah organik menggunakan LOOP");
-        
-        // Debug: Tampilkan posisi sampah
-        for (int i = 0; i < sampahOrganik.Length; i++)
+        if (debugMode)
         {
-            if (sampahOrganik[i] != null)
+            Debug.Log($"🎮 Level {levelNumber} Part 3 siap!");
+            Debug.Log($"🎯 Target: Ambil {requiredTrashCount} sampah organik menggunakan LOOP");
+            
+            // Debug: Tampilkan posisi sampah
+            for (int i = 0; i < sampahOrganik.Length; i++)
             {
-                Debug.Log($"🗑️ Sampah {i+1} di posisi: {sampahOrganik[i].transform.position}");
+                if (sampahOrganik[i] != null)
+                {
+                    Debug.Log($"🗑️ Sampah {i+1} di posisi: {sampahOrganik[i].transform.position}");
+                }
             }
-        }
-        
-        if (tongOrganik != null)
-        {
-            Debug.Log($"🗑️ Tong Organik di posisi: {tongOrganik.transform.position}");
+            
+            if (tongOrganik != null)
+            {
+                Debug.Log($"🗑️ Tong Organik di posisi: {tongOrganik.transform.position}");
+            }
         }
     }
     
@@ -125,7 +144,8 @@ public class LevelManagerPart3_Level2 : MonoBehaviour
     
     IEnumerator ExecuteAndCheckRoutine()
     {
-        Debug.Log("🔍 Memulai validasi Level 2 Part 3...");
+        if (debugMode)
+            Debug.Log("🔍 Memulai validasi Level 2 Part 3...");
         
         // Reset status sampah
         ResetTrashStatus();
@@ -187,10 +207,13 @@ public class LevelManagerPart3_Level2 : MonoBehaviour
         string[] commands = commandManager.GetCommandArray();
         
         // DEBUG: Tampilkan command array
-        Debug.Log("📋 COMMAND ARRAY LEVEL 2:");
-        for (int i = 0; i < commands.Length; i++)
+        if (debugMode)
         {
-            Debug.Log($"  [{i}] {commands[i]}");
+            Debug.Log("📋 COMMAND ARRAY LEVEL 2:");
+            for (int i = 0; i < commands.Length; i++)
+            {
+                Debug.Log($"  [{i}] {commands[i]}");
+            }
         }
         
         // 1. Validasi penggunaan LOOP
@@ -205,7 +228,8 @@ public class LevelManagerPart3_Level2 : MonoBehaviour
         // 4. Validasi hasil akhir
         bool validResult = ValidateFinalResult();
         
-        Debug.Log($"📊 Validasi: Loop={hasLoop}, Structure={validLoopStructure}, Algorithm={validAlgorithm}, Result={validResult}");
+        if (debugMode)
+            Debug.Log($"📊 Validasi: Loop={hasLoop}, Structure={validLoopStructure}, Algorithm={validAlgorithm}, Result={validResult}");
         
         // Berikan feedback spesifik
         if (!hasLoop && requireLoopForCollection)
@@ -346,7 +370,8 @@ public class LevelManagerPart3_Level2 : MonoBehaviour
             robotIsEmpty = (carriedTrash == "None" || string.IsNullOrEmpty(carriedTrash));
         }
         
-        Debug.Log($"📊 Hasil akhir: Sampah terkumpul={collectedCount}/{requiredTrashCount}, Robot kosong={robotIsEmpty}");
+        if (debugMode)
+            Debug.Log($"📊 Hasil akhir: Sampah terkumpul={collectedCount}/{requiredTrashCount}, Robot kosong={robotIsEmpty}");
         
         if (!allTrashCollected)
         {
@@ -363,7 +388,9 @@ public class LevelManagerPart3_Level2 : MonoBehaviour
     void LevelSuccess()
     {
         levelCompleted = true;
-        Debug.Log("🎉 LEVEL 2 PART 3 BERHASIL!");
+        
+        if (debugMode)
+            Debug.Log("🎉 LEVEL 2 PART 3 BERHASIL!");
         
         if (successPanel != null)
         {
@@ -377,6 +404,9 @@ public class LevelManagerPart3_Level2 : MonoBehaviour
             hintText.text = "🎉 Luar biasa! Loop membuat pekerjaan berulang jadi mudah!";
         }
         
+        // Play success sound
+        PlaySound(successSound);
+        
         // Save progress
         PlayerPrefs.SetInt("LevelPart3", levelNumber);
         PlayerPrefs.Save();
@@ -387,7 +417,8 @@ public class LevelManagerPart3_Level2 : MonoBehaviour
     
     void LevelFailed()
     {
-        Debug.Log("❌ LEVEL 2 PART 3 GAGAL");
+        if (debugMode)
+            Debug.Log("❌ LEVEL 2 PART 3 GAGAL");
         
         if (failedPanel != null)
         {
@@ -395,6 +426,9 @@ public class LevelManagerPart3_Level2 : MonoBehaviour
         }
         
         ShowMessage("Coba lagi! Perbaiki algoritma LOOP-mu", Color.red);
+        
+        // Play failed sound
+        PlaySound(failedSound);
         
         // Berikan hint spesifik
         ProvideDetailedHint();
@@ -454,7 +488,8 @@ public class LevelManagerPart3_Level2 : MonoBehaviour
         {
             if (sampahOrganik[i] != null && trashCollected[i])
             {
-                Debug.Log($"✨ Sampah {i+1} berhasil dikumpulkan!");
+                if (debugMode)
+                    Debug.Log($"✨ Sampah {i+1} berhasil dikumpulkan!");
                 yield return new WaitForSeconds(0.3f);
             }
         }
@@ -473,7 +508,9 @@ public class LevelManagerPart3_Level2 : MonoBehaviour
             feedbackText.text = message;
             feedbackText.color = color;
         }
-        Debug.Log($"📢 {message}");
+        
+        if (debugMode)
+            Debug.Log($"📢 {message}");
     }
     
     // UI BUTTON FUNCTIONS
@@ -533,7 +570,8 @@ public class LevelManagerPart3_Level2 : MonoBehaviour
             hintText.text = "💡 Tips: LOOP4 [AmbilSampah, Move] END_LOOP";
         }
         
-        Debug.Log("🔄 Level 2 Part 3 direset");
+        if (debugMode)
+            Debug.Log("🔄 Level 2 Part 3 direset");
     }
     
     void ResetAllTrash()
@@ -567,5 +605,18 @@ public class LevelManagerPart3_Level2 : MonoBehaviour
         }
         
         Debug.Log($"Total terkumpul: {collected}/{requiredTrashCount}");
+    }
+    
+    private void PlaySound(AudioClip clip)
+    {
+        if (audioSource != null && clip != null)
+        {
+            audioSource.PlayOneShot(clip);
+        }
+        else
+        {
+            if (debugMode) 
+                Debug.LogWarning($"Sound effect tidak ditemukan atau AudioSource belum di-set: {clip?.name}");
+        }
     }
 }

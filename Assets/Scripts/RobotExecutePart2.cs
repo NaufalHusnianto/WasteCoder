@@ -84,7 +84,7 @@ public class RobotExecutePart2 : MonoBehaviour
         if (arrowIndicator != null)
         {
             // Delay sedikit untuk sinkronisasi
-            Invoke("StartArrowIndicator", 0.3f);
+            Invoke("StartArrowIndicator", 0.2f);
         }
         
         string[] commands = commandManager.GetCommandArray();

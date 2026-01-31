@@ -27,9 +27,17 @@ public class LevelManagerPart2_Level4 : MonoBehaviour
     public GameObject successPanel;
     public GameObject failedPanel;
     
+    [Header("SOUND EFFECTS")]
+    public AudioSource audioSource;
+    public AudioClip successSound;
+    public AudioClip failedSound;
+    
     [Header("VALIDASI")]
     public bool requireBothIF = true;
     public bool requireCorrectOrder = true;
+    
+    [Header("DEBUG")]
+    public bool debugMode = true;
     
     private bool levelCompleted = false;
     private bool sampah1Dibuang = false;
@@ -66,8 +74,19 @@ public class LevelManagerPart2_Level4 : MonoBehaviour
         if (commandManager == null) commandManager = FindObjectOfType<CommandManagerPart2>();
         if (robot == null) robot = FindObjectOfType<RobotExecutePart2>();
         
-        Debug.Log($"🎮 Level {levelNumber} siap!");
-        Debug.Log($"Target: Pilah 2 sampah berurutan (Organik → Anorganik)");
+        // Find AudioSource jika belum di-set
+        if (audioSource == null)
+        {
+            audioSource = GetComponent<AudioSource>();
+            if (audioSource == null && debugMode)
+                Debug.LogWarning("AudioSource tidak ditemukan di GameObject ini");
+        }
+        
+        if (debugMode)
+        {
+            Debug.Log($"🎮 Level {levelNumber} siap!");
+            Debug.Log($"Target: Pilah 2 sampah berurutan (Organik → Anorganik)");
+        }
     }
     
     public void ExecuteAndCheck()
@@ -89,7 +108,8 @@ public class LevelManagerPart2_Level4 : MonoBehaviour
     
     IEnumerator ExecuteAndCheckRoutine()
     {
-        Debug.Log("🔍 Memulai validasi Level 4...");
+        if (debugMode)
+            Debug.Log("🔍 Memulai validasi Level 4...");
         
         // Reset status
         sampah1Dibuang = false;
@@ -139,10 +159,13 @@ public class LevelManagerPart2_Level4 : MonoBehaviour
         string[] commands = commandManager.GetCommandArray();
         
         // DEBUG: Tampilkan command array
-        Debug.Log("📋 COMMAND ARRAY LEVEL 4:");
-        for (int i = 0; i < commands.Length; i++)
+        if (debugMode)
         {
-            Debug.Log($"  [{i}] {commands[i]}");
+            Debug.Log("📋 COMMAND ARRAY LEVEL 4:");
+            for (int i = 0; i < commands.Length; i++)
+            {
+                Debug.Log($"  [{i}] {commands[i]}");
+            }
         }
         
         // 1. Validasi struktur algoritma
@@ -154,7 +177,8 @@ public class LevelManagerPart2_Level4 : MonoBehaviour
         // 3. Validasi hasil
         bool resultValid = ValidateResult();
         
-        Debug.Log($"📊 Validasi: Algoritma={algorithmValid}, Urutan={orderValid}, Hasil={resultValid}");
+        if (debugMode)
+            Debug.Log($"📊 Validasi: Algoritma={algorithmValid}, Urutan={orderValid}, Hasil={resultValid}");
         
         return algorithmValid && orderValid && resultValid;
     }
@@ -198,12 +222,15 @@ public class LevelManagerPart2_Level4 : MonoBehaviour
         hasTwoAmbil = (ambilCount >= 2);
         hasTwoBuang = (buangCount >= 2);
         
-        // Tampilkan analisis
-        Debug.Log($"📊 Struktur Algoritma:");
-        Debug.Log($"- IF_ORGANIK: {hasIFOrganik} (index: {ifOrganikIndex})");
-        Debug.Log($"- IF_ANORGANIK: {hasIFAnorganik} (index: {ifAnorganikIndex})");
-        Debug.Log($"- AmbilSampah: {ambilCount}x");
-        Debug.Log($"- BuangSampah: {buangCount}x");
+        // Tampilkan analisis jika debug mode aktif
+        if (debugMode)
+        {
+            Debug.Log($"📊 Struktur Algoritma:");
+            Debug.Log($"- IF_ORGANIK: {hasIFOrganik} (index: {ifOrganikIndex})");
+            Debug.Log($"- IF_ANORGANIK: {hasIFAnorganik} (index: {ifAnorganikIndex})");
+            Debug.Log($"- AmbilSampah: {ambilCount}x");
+            Debug.Log($"- BuangSampah: {buangCount}x");
+        }
         
         // Validasi Level 4 requirements
         if (requireBothIF && (!hasIFOrganik || !hasIFAnorganik))
@@ -280,10 +307,13 @@ public class LevelManagerPart2_Level4 : MonoBehaviour
             }
         }
         
-        Debug.Log($"📊 Urutan Command:");
-        Debug.Log($"- Ambil1: {ambil1Index}, Ambil2: {ambil2Index}");
-        Debug.Log($"- Buang1: {buang1Index}, Buang2: {buang2Index}");
-        Debug.Log($"- IF_Organik: {ifOrganikIndex}, IF_Anorganik: {ifAnorganikIndex}");
+        if (debugMode)
+        {
+            Debug.Log($"📊 Urutan Command:");
+            Debug.Log($"- Ambil1: {ambil1Index}, Ambil2: {ambil2Index}");
+            Debug.Log($"- Buang1: {buang1Index}, Buang2: {buang2Index}");
+            Debug.Log($"- IF_Organik: {ifOrganikIndex}, IF_Anorganik: {ifAnorganikIndex}");
+        }
         
         // Validasi urutan dasar
         bool validOrder = true;
@@ -385,11 +415,14 @@ public class LevelManagerPart2_Level4 : MonoBehaviour
         bool bothTrashDisposed = sampah1Dibuang && sampah2Dibuang;
         bool robotEmpty = (robot.GetCarriedTrash() == "None");
         
-        Debug.Log($"📊 Hasil Level 4:");
-        Debug.Log($"- Sampah 1 dibuang: {sampah1Dibuang}");
-        Debug.Log($"- Sampah 2 dibuang: {sampah2Dibuang}");
-        Debug.Log($"- Robot kosong: {robotEmpty}");
-        Debug.Log($"- Kedua sampah terpilah: {bothTrashDisposed}");
+        if (debugMode)
+        {
+            Debug.Log($"📊 Hasil Level 4:");
+            Debug.Log($"- Sampah 1 dibuang: {sampah1Dibuang}");
+            Debug.Log($"- Sampah 2 dibuang: {sampah2Dibuang}");
+            Debug.Log($"- Robot kosong: {robotEmpty}");
+            Debug.Log($"- Kedua sampah terpilah: {bothTrashDisposed}");
+        }
         
         // Berikan feedback spesifik
         if (!sampah1Dibuang && !sampah2Dibuang)
@@ -415,7 +448,9 @@ public class LevelManagerPart2_Level4 : MonoBehaviour
     void LevelSuccess()
     {
         levelCompleted = true;
-        Debug.Log("🎉 LEVEL 4 BERHASIL!");
+        
+        if (debugMode)
+            Debug.Log("🎉 LEVEL 4 BERHASIL!");
         
         if (successPanel != null)
         {
@@ -424,6 +459,9 @@ public class LevelManagerPart2_Level4 : MonoBehaviour
         
         ShowMessage("HEBAT! Kamu berhasil memilah dua sampah berurutan!", Color.green);
         
+        // Play success sound
+        PlaySound(successSound);
+        
         // Save progress
         PlayerPrefs.SetInt("LevelPart2", levelNumber);
         PlayerPrefs.Save();
@@ -431,7 +469,8 @@ public class LevelManagerPart2_Level4 : MonoBehaviour
     
     void LevelFailed()
     {
-        Debug.Log("❌ LEVEL 4 GAGAL");
+        if (debugMode)
+            Debug.Log("❌ LEVEL 4 GAGAL");
         
         if (failedPanel != null)
         {
@@ -439,6 +478,9 @@ public class LevelManagerPart2_Level4 : MonoBehaviour
         }
         
         ShowMessage("Perbaiki algoritma untuk dua sampah!", Color.red);
+        
+        // Play failed sound
+        PlaySound(failedSound);
     }
     
     void ShowMessage(string message, Color color)
@@ -448,7 +490,9 @@ public class LevelManagerPart2_Level4 : MonoBehaviour
             feedbackText.text = message;
             feedbackText.color = color;
         }
-        Debug.Log(message);
+        
+        if (debugMode)
+            Debug.Log(message);
     }
     
     // UI BUTTON FUNCTIONS
@@ -501,7 +545,8 @@ public class LevelManagerPart2_Level4 : MonoBehaviour
             feedbackText.color = Color.white;
         }
         
-        Debug.Log("🔄 Level 4 direset");
+        if (debugMode)
+            Debug.Log("🔄 Level 4 direset");
     }
     
     // DEBUG
@@ -512,5 +557,18 @@ public class LevelManagerPart2_Level4 : MonoBehaviour
         Debug.Log($"Sampah 1: {sampah1Dibuang}");
         Debug.Log($"Sampah 2: {sampah2Dibuang}");
         Debug.Log($"Robot carrying: {robot.GetCarriedTrash()}");
+    }
+    
+    private void PlaySound(AudioClip clip)
+    {
+        if (audioSource != null && clip != null)
+        {
+            audioSource.PlayOneShot(clip);
+        }
+        else
+        {
+            if (debugMode) 
+                Debug.LogWarning($"Sound effect tidak ditemukan atau AudioSource belum di-set: {clip?.name}");
+        }
     }
 }

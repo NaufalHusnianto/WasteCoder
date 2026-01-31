@@ -25,8 +25,16 @@ public class LevelManagerPart3 : MonoBehaviour
     public GameObject successPanel;
     public GameObject failedPanel;
     
+    [Header("SOUND EFFECTS")]
+    public AudioSource audioSource;
+    public AudioClip successSound;
+    public AudioClip failedSound;
+    
     [Header("LEVEL REQUIREMENTS")]
     public int requiredMoveCount = 4; // Harus bergerak 4 langkah
+    
+    [Header("DEBUG")]
+    public bool debugMode = true;
     
     private bool levelCompleted = false;
     private Vector3 robotStartPosition;
@@ -68,8 +76,19 @@ public class LevelManagerPart3 : MonoBehaviour
         if (commandManager == null) commandManager = FindObjectOfType<CommandManagerPart3>();
         if (robot == null) robot = FindObjectOfType<RobotExecutePart3>();
         
-        Debug.Log($"🎮 Level {levelNumber} Part 3 siap!");
-        Debug.Log($"🎯 Target: Bergerak 4 langkah maju menggunakan LOOP");
+        // Find AudioSource jika belum di-set
+        if (audioSource == null)
+        {
+            audioSource = GetComponent<AudioSource>();
+            if (audioSource == null && debugMode)
+                Debug.LogWarning("AudioSource tidak ditemukan di GameObject ini");
+        }
+        
+        if (debugMode)
+        {
+            Debug.Log($"🎮 Level {levelNumber} Part 3 siap!");
+            Debug.Log($"🎯 Target: Bergerak 4 langkah maju menggunakan LOOP");
+        }
     }
     
     void SetupTargetPosition()
@@ -92,7 +111,8 @@ public class LevelManagerPart3 : MonoBehaviour
         if (targetPosition != null)
         {
             targetPosition.position = CalculateTargetPosition();
-            Debug.Log($"🎯 Target position set to: {targetPosition.position}");
+            if (debugMode)
+                Debug.Log($"🎯 Target position set to: {targetPosition.position}");
         }
     }
     
@@ -127,7 +147,8 @@ public class LevelManagerPart3 : MonoBehaviour
     
     IEnumerator ExecuteAndCheckRoutine()
     {
-        Debug.Log("🔍 Memulai validasi Level Part 3...");
+        if (debugMode)
+            Debug.Log("🔍 Memulai validasi Level Part 3...");
         
         // Simpan posisi awal robot
         robotStartPosition = robot.transform.position;
@@ -173,10 +194,13 @@ public class LevelManagerPart3 : MonoBehaviour
         string[] commands = commandManager.GetCommandArray();
         
         // DEBUG: Tampilkan command array
-        Debug.Log("📋 COMMAND ARRAY:");
-        for (int i = 0; i < commands.Length; i++)
+        if (debugMode)
         {
-            Debug.Log($"  [{i}] {commands[i]}");
+            Debug.Log("📋 COMMAND ARRAY:");
+            for (int i = 0; i < commands.Length; i++)
+            {
+                Debug.Log($"  [{i}] {commands[i]}");
+            }
         }
         
         // 1. Validasi apakah menggunakan LOOP
@@ -191,7 +215,8 @@ public class LevelManagerPart3 : MonoBehaviour
         // 4. Validasi struktur LOOP sederhana
         bool validStructure = ValidateLoopStructure(commands);
         
-        Debug.Log($"📊 Validasi: Loop={hasLoop}, Steps={hasCorrectSteps}, Target={reachedTarget}, Structure={validStructure}");
+        if (debugMode)
+            Debug.Log($"📊 Validasi: Loop={hasLoop}, Steps={hasCorrectSteps}, Target={reachedTarget}, Structure={validStructure}");
         
         // Berikan feedback spesifik
         if (!hasLoop)
@@ -238,7 +263,8 @@ public class LevelManagerPart3 : MonoBehaviour
     {
         int totalMoveCount = CalculateTotalMoves(commands);
         
-        Debug.Log($"📊 Jumlah langkah: {totalMoveCount} (dibutuhkan: {requiredMoveCount})");
+        if (debugMode)
+            Debug.Log($"📊 Jumlah langkah: {totalMoveCount} (dibutuhkan: {requiredMoveCount})");
         
         return totalMoveCount == requiredMoveCount;
     }
@@ -256,12 +282,14 @@ public class LevelManagerPart3 : MonoBehaviour
             if (cmd == "Move")
             {
                 totalMoves += currentLoopMultiplier;
-                Debug.Log($"   ➕ Move * {currentLoopMultiplier} = +{currentLoopMultiplier}");
+                if (debugMode)
+                    Debug.Log($"   ➕ Move * {currentLoopMultiplier} = +{currentLoopMultiplier}");
             }
             else if (cmd.StartsWith("LOOP"))
             {
                 int loopCount = GetLoopCount(cmd);
-                Debug.Log($"   🔄 LOOP {loopCount}x (multiplier: {currentLoopMultiplier} → {currentLoopMultiplier * loopCount})");
+                if (debugMode)
+                    Debug.Log($"   🔄 LOOP {loopCount}x (multiplier: {currentLoopMultiplier} → {currentLoopMultiplier * loopCount})");
                 
                 loopMultipliers.Push(currentLoopMultiplier);
                 currentLoopMultiplier *= loopCount;
@@ -271,7 +299,8 @@ public class LevelManagerPart3 : MonoBehaviour
                 if (loopMultipliers.Count > 0)
                 {
                     int previousMultiplier = loopMultipliers.Pop();
-                    Debug.Log($"   ✅ END_LOOP (multiplier: {currentLoopMultiplier} → {previousMultiplier})");
+                    if (debugMode)
+                        Debug.Log($"   ✅ END_LOOP (multiplier: {currentLoopMultiplier} → {previousMultiplier})");
                     currentLoopMultiplier = previousMultiplier;
                 }
             }
@@ -330,13 +359,17 @@ public class LevelManagerPart3 : MonoBehaviour
             float expectedDistance = requiredMoveCount * 1.0f; // Asumsi moveDistance = 1
             bool isCorrect = Mathf.Abs(distanceMoved - expectedDistance) < tolerance;
             
-            Debug.Log($"📏 Jarak ditempuh: {distanceMoved:F2} (diharapkan: {expectedDistance})");
+            if (debugMode)
+                Debug.Log($"📏 Jarak ditempuh: {distanceMoved:F2} (diharapkan: {expectedDistance})");
+            
             return isCorrect;
         }
         
         // Validasi dengan target position
         float distanceToTarget = Vector3.Distance(robot.transform.position, targetPosition.position);
-        Debug.Log($"🎯 Jarak ke target: {distanceToTarget:F2} (toleransi: {tolerance})");
+        
+        if (debugMode)
+            Debug.Log($"🎯 Jarak ke target: {distanceToTarget:F2} (toleransi: {tolerance})");
         
         return distanceToTarget <= tolerance;
     }
@@ -344,7 +377,9 @@ public class LevelManagerPart3 : MonoBehaviour
     void LevelSuccess()
     {
         levelCompleted = true;
-        Debug.Log("🎉 LEVEL PART 3 BERHASIL!");
+        
+        if (debugMode)
+            Debug.Log("🎉 LEVEL PART 3 BERHASIL!");
         
         if (successPanel != null)
         {
@@ -358,6 +393,9 @@ public class LevelManagerPart3 : MonoBehaviour
             hintText.text = "🎉 Hebat! Kamu menguasai dasar LOOP!";
         }
         
+        // Play success sound
+        PlaySound(successSound);
+        
         // Save progress
         PlayerPrefs.SetInt("LevelPart3", levelNumber);
         PlayerPrefs.Save();
@@ -368,7 +406,8 @@ public class LevelManagerPart3 : MonoBehaviour
     
     void LevelFailed()
     {
-        Debug.Log("❌ LEVEL PART 3 GAGAL");
+        if (debugMode)
+            Debug.Log("❌ LEVEL PART 3 GAGAL");
         
         if (failedPanel != null)
         {
@@ -376,6 +415,9 @@ public class LevelManagerPart3 : MonoBehaviour
         }
         
         ShowMessage("Coba lagi! Periksa algoritma LOOP-mu", Color.red);
+        
+        // Play failed sound
+        PlaySound(failedSound);
         
         // Berikan hint berdasarkan kesalahan
         ProvideSpecificHint();
@@ -461,7 +503,9 @@ public class LevelManagerPart3 : MonoBehaviour
             feedbackText.text = message;
             feedbackText.color = color;
         }
-        Debug.Log($"📢 {message}");
+        
+        if (debugMode)
+            Debug.Log($"📢 {message}");
     }
     
     // UI BUTTON FUNCTIONS
@@ -525,7 +569,8 @@ public class LevelManagerPart3 : MonoBehaviour
             hintText.text = "💡 Tips: LOOP4 [Move] END_LOOP = 4 langkah maju";
         }
         
-        Debug.Log("🔄 Level Part 3 direset");
+        if (debugMode)
+            Debug.Log("🔄 Level Part 3 direset");
     }
     
     // DEBUG FUNCTIONS
@@ -575,7 +620,21 @@ public class LevelManagerPart3 : MonoBehaviour
         if (robot != null && targetPosition != null)
         {
             targetPosition.position = robot.transform.position + robot.transform.forward * requiredMoveCount;
-            Debug.Log($"🎯 Target position manually set to: {targetPosition.position}");
+            if (debugMode)
+                Debug.Log($"🎯 Target position manually set to: {targetPosition.position}");
+        }
+    }
+    
+    private void PlaySound(AudioClip clip)
+    {
+        if (audioSource != null && clip != null)
+        {
+            audioSource.PlayOneShot(clip);
+        }
+        else
+        {
+            if (debugMode) 
+                Debug.LogWarning($"Sound effect tidak ditemukan atau AudioSource belum di-set: {clip?.name}");
         }
     }
     

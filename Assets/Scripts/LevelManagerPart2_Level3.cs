@@ -26,8 +26,16 @@ public class LevelManagerPart2_Level3 : MonoBehaviour
     public GameObject successPanel;
     public GameObject failedPanel;
     
+    [Header("SOUND EFFECTS")]
+    public AudioSource audioSource;
+    public AudioClip successSound;
+    public AudioClip failedSound;
+    
     [Header("LEVEL SETTING")]
     public bool randomTrashEachTry = true; // Sampah random setiap reset
+    
+    [Header("DEBUG")]
+    public bool debugMode = true;
     
     public enum TrashType { Organik, Anorganik, Random }
     
@@ -68,11 +76,22 @@ public class LevelManagerPart2_Level3 : MonoBehaviour
         if (commandManager == null) commandManager = FindObjectOfType<CommandManagerPart2>();
         if (robot == null) robot = FindObjectOfType<RobotExecutePart2>();
         
+        // Find AudioSource jika belum di-set
+        if (audioSource == null)
+        {
+            audioSource = GetComponent<AudioSource>();
+            if (audioSource == null && debugMode)
+                Debug.LogWarning("AudioSource tidak ditemukan di GameObject ini");
+        }
+        
         // Setup sampah berdasarkan jenis
         SetupTrashType();
         
-        Debug.Log($"🎮 Level {levelNumber} siap!");
-        Debug.Log($"Jenis sampah: {currentTrashType}");
+        if (debugMode)
+        {
+            Debug.Log($"🎮 Level {levelNumber} siap!");
+            Debug.Log($"Jenis sampah: {currentTrashType}");
+        }
     }
     
     void SetupTrashType()
@@ -121,7 +140,8 @@ public class LevelManagerPart2_Level3 : MonoBehaviour
     
     IEnumerator ExecuteAndCheckRoutine()
     {
-        Debug.Log($"🔍 Memulai validasi Level 3 (Sampah: {currentTrashType})...");
+        if (debugMode)
+            Debug.Log($"🔍 Memulai validasi Level 3 (Sampah: {currentTrashType})...");
         
         // Jalankan robot
         robot.ExecuteCommands();
@@ -164,7 +184,8 @@ public class LevelManagerPart2_Level3 : MonoBehaviour
         // 2. Validasi hasil akhir
         bool resultValid = ValidateResult();
         
-        Debug.Log($"📊 Validasi: Structure={structureValid}, Result={resultValid}");
+        if (debugMode)
+            Debug.Log($"📊 Validasi: Structure={structureValid}, Result={resultValid}");
         
         return structureValid && resultValid;
     }
@@ -246,15 +267,14 @@ public class LevelManagerPart2_Level3 : MonoBehaviour
         // Cek apakah sampah sudah dibuang dengan benar
         bool sampahDibuang = !targetSampah.IsCollectable();
         bool robotKosong = (robot.GetCarriedTrash() == "None");
-        bool tempatBenar = true;
         
-        // Untuk Level 3, yang penting algoritma IF-ELSE benar
-        // Hasil sampah ke tempat yang benar dihandle oleh robot sendiri
-        
-        Debug.Log($"📊 Hasil:");
-        Debug.Log($"- Sampah dibuang: {sampahDibuang}");
-        Debug.Log($"- Robot kosong: {robotKosong}");
-        Debug.Log($"- Jenis sampah: {currentTrashType}");
+        if (debugMode)
+        {
+            Debug.Log($"📊 Hasil:");
+            Debug.Log($"- Sampah dibuang: {sampahDibuang}");
+            Debug.Log($"- Robot kosong: {robotKosong}");
+            Debug.Log($"- Jenis sampah: {currentTrashType}");
+        }
         
         if (!sampahDibuang)
         {
@@ -274,7 +294,9 @@ public class LevelManagerPart2_Level3 : MonoBehaviour
     void LevelSuccess()
     {
         levelCompleted = true;
-        Debug.Log($"🎉 LEVEL 3 BERHASIL! (Sampah: {currentTrashType})");
+        
+        if (debugMode)
+            Debug.Log($"🎉 LEVEL 3 BERHASIL! (Sampah: {currentTrashType})");
         
         if (successPanel != null)
         {
@@ -283,6 +305,9 @@ public class LevelManagerPart2_Level3 : MonoBehaviour
         
         ShowMessage($"SUKSES! IF-ELSE berhasil untuk sampah {currentTrashType}!", Color.green);
         
+        // Play success sound
+        PlaySound(successSound);
+        
         // Save progress
         PlayerPrefs.SetInt("LevelPart2", levelNumber);
         PlayerPrefs.Save();
@@ -290,7 +315,8 @@ public class LevelManagerPart2_Level3 : MonoBehaviour
     
     void LevelFailed()
     {
-        Debug.Log($"❌ LEVEL 3 GAGAL (Sampah: {currentTrashType})");
+        if (debugMode)
+            Debug.Log($"❌ LEVEL 3 GAGAL (Sampah: {currentTrashType})");
         
         if (failedPanel != null)
         {
@@ -298,6 +324,9 @@ public class LevelManagerPart2_Level3 : MonoBehaviour
         }
         
         ShowMessage("Perbaiki algoritma IF-ELSE-mu!", Color.red);
+        
+        // Play failed sound
+        PlaySound(failedSound);
     }
     
     void ShowMessage(string message, Color color)
@@ -307,7 +336,9 @@ public class LevelManagerPart2_Level3 : MonoBehaviour
             feedbackText.text = message;
             feedbackText.color = color;
         }
-        Debug.Log(message);
+        
+        if (debugMode)
+            Debug.Log(message);
     }
     
     // UI BUTTON FUNCTIONS
@@ -350,6 +381,20 @@ public class LevelManagerPart2_Level3 : MonoBehaviour
             feedbackText.color = Color.white;
         }
         
-        Debug.Log($"🔄 Level 3 direset (Sampah: {currentTrashType})");
+        if (debugMode)
+            Debug.Log($"🔄 Level 3 direset (Sampah: {currentTrashType})");
+    }
+    
+    private void PlaySound(AudioClip clip)
+    {
+        if (audioSource != null && clip != null)
+        {
+            audioSource.PlayOneShot(clip);
+        }
+        else
+        {
+            if (debugMode) 
+                Debug.LogWarning($"Sound effect tidak ditemukan atau AudioSource belum di-set: {clip?.name}");
+        }
     }
 }
